@@ -8,9 +8,11 @@ Byte count: usedBytes_ increases by text.size() on accepted arrival and decrease
 Order of checks in receive: validate id/sender/text, budget, and duplicate id before allocating, so rejections change nothing.
 
 **How to Compile**
+
 g++ -std=c++23 -Wall -Wextra -pedantic main.cpp MessageInbox.cpp -o message_inbox
 
 **How to Run**
+
 ./message_inbox
 python validate.py
 
