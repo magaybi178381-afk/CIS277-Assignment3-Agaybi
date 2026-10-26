@@ -1,5 +1,5 @@
-CIS-277 Assignment 3: Text Messages and Dynamic Memory
-Student: Marc Agaybi
+**CIS-277 Assignment 3: Text Messages and Dynamic Memory
+Student: Marc Agaybi**
 
 Node fields: a private Node holding a TextMessage message and Node* next. Constructor sets isRead = false and next = nullptr.
 Ownership: the MessageInbox owns every node. Nodes are created with new in receive and released with delete in erase and clear. The destructor calls clear(). Copying is deleted so two inboxes can never own the same chain.
@@ -7,16 +7,16 @@ Head/tail updates: receive links at the tail (tail_->next = node; tail_ = node, 
 Byte count: usedBytes_ increases by text.size() on accepted arrival and decreases by the same amount on erase. clear() resets it to 0. Accessors only return fields.
 Order of checks in receive: validate id/sender/text, budget, and duplicate id before allocating, so rejections change nothing.
 
-How to Compile
+**How to Compile**
 g++ -std=c++23 -Wall -Wextra -pedantic main.cpp MessageInbox.cpp -o message_inbox
 
-How to Run
+**How to Run**
 ./message_inbox
 python validate.py
 
 g++ -std=c++23 -Wall -Wextra -pedantic -I. tests/my_tests.cpp MessageInbox.cpp -o my_tests && ./my_tests
 
-Tests and Results
+**Tests and Results**
 
 tests/my_tests.cpp prints expected vs. actual for each check. All 38 checks passed, with no corrections needed in the final run. Compiled with -fsanitize=address,undefined (AddressSanitizer includes LeakSanitizer): no errors and no leaks reported. Valgrind was not available in my environment.
 
@@ -46,7 +46,7 @@ Reuse after clear()	full budget restored, receive works	as expected
 
 The 20-byte demo in main.cpp reproduces the assignment table (3 → 12 → rejected → read → 9 → 20 bytes).
 
-Pointer diagrams
+**Pointer diagrams**
 
 Delete first (101) from 101 -> 102 -> 103:
 
@@ -66,7 +66,7 @@ Before: head -> [101] -> null     tail -> [101]
 After:  head = null               tail = null
 Changed: head and tail both become null.
 
-Analysis Questions
+**Analysis Questions**
 
 Pointers on delete. First: head moves to the next node (tail unchanged unless it was the only node). Last: the previous node's next becomes null and tail moves to that previous node. Only node: both head and tail become null. See diagrams above.
 
@@ -79,5 +79,5 @@ Why receive is O(n). Appending at the tail is O(1) link changes because tail_ is
 Ownership problems. Nodes left allocated after destruction are leaked memory. Two inboxes sharing one chain would each try to delete the same nodes (double free / use after free), and a change in one would corrupt the other's head, tail, and counts. Deleting copy operations prevents this.
 
 
-AI Use:
+**AI Use:**
 I used Claude to generate a first draft of the code and tests, then reviewed every line.
