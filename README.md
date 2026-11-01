@@ -4,11 +4,11 @@
 Marc Agaybi
 
 ## Design
-- **Node fields:** a private `Node` holding a `TextMessage message` and `Node* next`. Constructor sets `isRead = false` and `next = nullptr`.
-- **Ownership:** the `MessageInbox` owns every node. Nodes are created with `new` in `receive` and released with `delete` in `erase` and `clear`. The destructor calls `clear()`. Copying is deleted so two inboxes can never own the same chain.
-- **Head/tail updates:** `receive` links at the tail (`tail_->next = node; tail_ = node`, or sets both head and tail if empty). `erase` walks with a `prev` pointer; deleting the head moves `head_`, deleting the tail moves `tail_` to `prev` (null if it was the only node).
-- **Byte count:** `usedBytes_` increases by `text.size()` on accepted arrival and decreases by the same amount on erase. `clear()` resets it to 0. Accessors only return fields.
-- **Order of checks in `receive`:** validate id/sender/text, budget, and duplicate id *before* allocating, so rejections change nothing.
+- **Node fields:** a private Node holding a TextMessage message and Node* next. Constructor sets isRead = false and next = nullptr.
+- **Ownership:** the MessageInbox owns every node. Nodes are created with new in receive and released with delete in erase and clear. The destructor calls clear(). Copying is deleted so two inboxes can never own the same chain.
+- **Head/tail updates:** receive links at the tail (tail_->next = node; tail_ = node, or sets both head and tail if empty). erase walks with a prev pointer; deleting the head moves head_, deleting the tail moves tail_ to prev (null if it was the only node).
+- **Byte count:** usedBytes_ increases by text.size() on accepted arrival and decreases by the same amount on erase. clear() resets it to 0. Accessors only return fields.
+- **Order of checks in `receive`:** validate id/sender/text, budget, and duplicate id before allocating, so rejections change nothing.
 
 ## How to Compile
 ```
