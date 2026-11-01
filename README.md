@@ -8,7 +8,7 @@ Marc Agaybi
 - **Ownership:** the MessageInbox owns every node. Nodes are created with new in receive and released with delete in erase and clear. The destructor calls clear(). Copying is deleted so two inboxes can never own the same chain.
 - **Head/tail updates:** receive links at the tail (tail_->next = node; tail_ = node, or sets both head and tail if empty). erase walks with a prev pointer; deleting the head moves head_, deleting the tail moves tail_ to prev (null if it was the only node).
 - **Byte count:** usedBytes_ increases by text.size() on accepted arrival and decreases by the same amount on erase. clear() resets it to 0. Accessors only return fields.
-- **Order of checks in `receive`:** validate id/sender/text, budget, and duplicate id before allocating, so rejections change nothing.
+- **Order of checks in receive:** validate id/sender/text, budget, and duplicate id before allocating, so rejections change nothing.
 
 ## How to Compile
 ```
@@ -65,15 +65,15 @@ Changed: head and tail both become null.
 ```
 
 ## Analysis Questions
-1. **Pointers on delete.** First: `head` moves to the next node (tail unchanged unless it was the only node). Last: the previous node's `next` becomes null and `tail` moves to that previous node. Only node: both `head` and `tail` become null. See diagrams above.
-2. **Read vs. delete.** Reading copies the message and sets `isRead`; the node and its text stay stored, so the bytes are still in use. Deleting removes the text from the inbox, so its `text.size()` is subtracted from the counter and that room can be reused.
-3. **What the counter measures.** Only the sum of `text.size()` over stored messages. It excludes sender strings, node fields (`next`, `id`, `isRead`), `std::string` capacity and small-string storage, allocator overhead, and the null terminator. It models a text-storage limit, not real RAM use.
-4. **Why receive is O(n).** Appending at the tail is O(1) link changes because `tail_` is kept, but the duplicate-ID check must traverse up to n nodes. Allocating the node and copying sender and text costs time proportional to their lengths (plus the allocator's cost), which is separate from the list search.
+1. **Pointers on delete.** First: head moves to the next node (tail unchanged unless it was the only node). Last: the previous node's next becomes null and tail moves to that previous node. Only node: both head and tail become null. See diagrams above.
+2. **Read vs. delete.** Reading copies the message and sets isRead; the node and its text stay stored, so the bytes are still in use. Deleting removes the text from the inbox, so its `text.size()` is subtracted from the counter and that room can be reused.
+3. **What the counter measures.** Only the sum of text.size() over stored messages. It excludes sender strings, node fields (next, id, isRead), std::string capacity and small-string storage, allocator overhead, and the null terminator. It models a text-storage limit, not real RAM use.
+4. **Why receive is O(n).** Appending at the tail is O(1) link changes because tail_ is kept, but the duplicate-ID check must traverse up to n nodes. Allocating the node and copying sender and text costs time proportional to their lengths (plus the allocator's cost), which is separate from the list search.
 5. **Ownership problems.** Nodes left allocated after destruction are leaked memory. Two inboxes sharing one chain would each try to delete the same nodes (double free / use after free), and a change in one would corrupt the other's head, tail, and counts. Deleting copy operations prevents this.
 
 ## AI Use
 I used Claude to generate a first draft of the code and tests, then reviewed every line.
 
-- **Decision:** I validate the id, sender, text, budget, and duplicate id in `receive` before calling `new`, so a rejected arrival cannot leak memory or change the inbox.
-- **Check:** `tests/my_tests.cpp` deletes the head, middle, tail, and only node and then appends again, and I compiled it with `-fsanitize=address,undefined` to look for leaks. After the first grading I also found my `MessageInbox.h` had lost its closing `#endif` when I copied it into the repository, so I now rebuild from a fresh clone before submitting.
-- **Learned / still practicing:** I need to keep practicing tracing `prev`, `cur`, and `tail_` by hand when deleting the last node, and checking that every file I submit is complete.
+- **Decision:** I validate the id, sender, text, budget, and duplicate id in receive before calling new, so a rejected arrival cannot leak memory or change the inbox.
+- **Check:** tests/my_tests.cpp deletes the head, middle, tail, and only node and then appends again, and I compiled it with -fsanitize=address,undefined to look for leaks. After the first grading I also found my MessageInbox.h had lost its closing #endif, so I now rebuild it before submitting.
+- **Learned / still practicing:** I need to keep practicing tracing prev, cur, and tail_ by hand when deleting the last node, and checking that every file I submit is complete.
