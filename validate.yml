@@ -1,0 +1,18 @@
+name: Assignment 3 Preflight
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  public-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install C++23 compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-14
+      - name: Run public preflight
+        run: python3 validate.py --compiler g++-14
