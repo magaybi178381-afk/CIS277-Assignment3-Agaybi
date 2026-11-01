@@ -1,6 +1,6 @@
 #ifndef MESSAGE_INBOX_H
 #define MESSAGE_INBOX_H
- 
+
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@ public:
     ~MessageInbox();
     MessageInbox(const MessageInbox&) = delete;
     MessageInbox& operator=(const MessageInbox&) = delete;
- 
+
     bool receive(std::size_t id,
                  const std::string& sender,
                  const std::string& text);
@@ -31,7 +31,7 @@ public:
     std::size_t remainingTextBytes() const;
 
 private:
-
+    // Each node owns its TextMessage (and therefore its strings).
     struct Node {
         TextMessage message;
         Node* next;
@@ -47,3 +47,5 @@ private:
     std::size_t usedBytes_;
     std::size_t maxBytes_;
 };
+
+#endif
